@@ -71,8 +71,11 @@ The original datasets contain hundreds of thousands of products and tens of mill
 ## Repository Structure
 amazon-customer-behavior-analytics/
 ├── data/ # Sampled and anonymized datasets
+
 ├── notebooks/ # EDA, segmentation, and sentiment analysis
+
 ├── website/ # Interactive multi-page data story
+
 └── README.md
 
 ## Key Insights and Business Takeaways
