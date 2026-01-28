@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Amazon Consumer Analytics</title>
+    <script src="https://public.flourish.studio/resources/embed.js"></script>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --amazon-orange: #FF9900;
+            --slate-gray: #232F3E;
+            --slate-medium: #37475A;
+            --slate-light: #545B64;
+            --bg-light: #F8F8F8;
+            --white: #FFFFFF;
+        }
+
+        body {
+            font-family: 'Times New Roman', Times, serif;
+            line-height: 1.7;
+            color: var(--slate-gray);
+            background: var(--bg-light);
+        }
+
+        /* Navigation */
+        nav {
+            background: var(--slate-gray);
+            padding: 1.2rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 3rem;
+        }
+
+        /* Amazon Logo in Nav */
+        .nav-logo {
+            width: 90px;
+            height: auto;
+            margin-right: 2rem;
+            background: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+        }
+
+        nav ul {
+            list-style: none;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 2.5rem;
+            flex-wrap: wrap;
+        }
+
+        nav a {
+            color: var(--white);
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 400;
+            letter-spacing: 0.5px;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+
+        nav a:hover {
+            background: var(--amazon-orange);
+            color: var(--white);
+            transform: translateY(-2px);
+        }
+
+        /* Page Container */
+        .page {
+            display: none;
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+            background: var(--white);
+            min-height: calc(100vh - 60px);
+            box-shadow: 0 0 20px rgba(0,0,0,0.08);
+            position: relative;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        /* Typography */
+        h1 {
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 2.8rem;
+            font-weight: bold;
+            color: var(--slate-gray);
+            margin-bottom: 1.5rem;
+            line-height: 1.2;
+            font-style: normal;
+        }
+
+        h2 {
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--slate-gray);
+            margin: 3rem 0 1.5rem 0;
+            border-left: 5px solid var(--amazon-orange);
+            padding-left: 1rem;
+            font-style: normal;
+        }
+
+        h3 {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: var(--slate-medium);
+            margin: 2rem 0 1rem 0;
+            font-style: normal;
+        }
+
+        .tagline {
+            font-size: 1.3rem;
+            color: var(--slate-light);
+            font-weight: 300;
+            margin-bottom: 2.5rem;
+            line-height: 1.6;
+            font-style: normal;
+        }
+
+        .intro-text {
+            font-size: 1.1rem;
+            line-height: 1.9;
+            color: var(--slate-medium);
+            margin-bottom: 2rem;
+            font-style: normal;
+        }
+
+        p {
+            margin-bottom: 1.5rem;
+            font-size: 1.05rem;
+            font-style: normal;
+        }
+
+        /* Lists */
+        ul {
+            margin: 1.5rem 0;
+            padding-left: 2rem;
+        }
+
+        li {
+            margin-bottom: 1rem;
+            line-height: 1.8;
+            font-style: normal;
+        }
+
+        strong {
+            color: var(--slate-gray);
+            font-weight: bold;
+            font-style: normal;
+        }
+
+        em {
+            font-style: normal;
+            font-weight: 500;
+        }
+
+        /* Insight Boxes */
+        .insight-box {
+            background: linear-gradient(135deg, #FFF5E6 0%, #FFE8CC 100%);
+            border-left: 5px solid var(--amazon-orange);
+            padding: 1.8rem;
+            margin: 2rem 0;
+            border-radius: 4px;
+            box-shadow: 0 2px 8px rgba(255, 153, 0, 0.1);
+            font-style: normal;
+        }
+
+        .insight-box h3 {
+            margin-top: 0;
+            color: var(--amazon-orange);
+            font-size: 1.2rem;
+            font-style: normal;
+        }
+
+        .insight-box ul {
+            margin-bottom: 0;
+        }
+
+        /* Story Boxes */
+        .story-box {
+            background: var(--bg-light);
+            padding: 1.5rem;
+            margin: 2rem 0;
+            border-left: 3px solid var(--slate-medium);
+            color: var(--slate-light);
+            font-style: normal;
+        }
+
+        /* Visualization Containers */
+        .viz-container {
+            margin: 2.5rem 0;
+            padding: 2rem;
+            background: var(--bg-light);
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .viz-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: var(--slate-gray);
+            margin-bottom: 1.5rem;
+            text-align: center;
+            font-style: normal;
+        }
+
+        /* Homepage Specific */
+        .hero {
+            text-align: center;
+            padding: 3rem 0;
+            background: linear-gradient(135deg, var(--slate-gray) 0%, var(--slate-medium) 100%);
+            color: var(--white);
+            margin: -3rem -2rem 3rem -2rem;
+            border-radius: 0 0 20px 20px;
+        }
+
+        .hero h1 {
+            color: var(--white);
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .hero .tagline {
+            color: var(--amazon-orange);
+            font-size: 1.4rem;
+        }
+
+        /* Amazon HQ Image */
+        .amazon-hq-image {
+            width: 100%;
+            max-width: 900px;
+            height: auto;
+            margin: 2rem auto;
+            display: block;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+        }
+
+        .page-preview {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin: 3rem 0;
+        }
+
+        .preview-card {
+            background: var(--bg-light);
+            padding: 1.5rem;
+            border-radius: 8px;
+            border-top: 4px solid var(--amazon-orange);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .preview-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(255, 153, 0, 0.2);
+        }
+
+        .preview-card h3 {
+            margin-top: 0;
+            font-size: 1.2rem;
+            color: var(--slate-gray);
+        }
+
+        /* Creator Section */
+        .creators-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin: 3rem 0;
+        }
+
+        .creator-card {
+            background: var(--bg-light);
+            padding: 2rem;
+            border-radius: 8px;
+            border-top: 4px solid var(--amazon-orange);
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        }
+
+        .creator-card h3 {
+            margin-top: 0;
+            margin-bottom: 0.5rem;
+            font-size: 1.3rem;
+            color: var(--slate-gray);
+        }
+
+        .creator-card p {
+            margin-bottom: 0.5rem;
+            color: var(--slate-medium);
+            font-size: 1rem;
+        }
+
+        /* Transition Boxes */
+        .transition-box {
+            background: var(--slate-gray);
+            color: var(--white);
+            padding: 2rem;
+            margin: 3rem 0;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            border-left: 5px solid var(--amazon-orange);
+            font-style: normal;
+        }
+
+        /* Conclusion Box */
+        .conclusion-box {
+            background: linear-gradient(135deg, #232F3E 0%, #37475A 100%);
+            color: var(--white);
+            padding: 2.5rem;
+            margin: 3rem 0;
+            border-radius: 8px;
+            border-left: 5px solid var(--amazon-orange);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            font-style: normal;
+        }
+
+        .conclusion-box h3 {
+            color: var(--amazon-orange);
+            margin-top: 0;
+            margin-bottom: 1.5rem;
+            font-style: normal;
+        }
+
+        .conclusion-box p {
+            color: var(--white);
+            line-height: 1.9;
+            font-style: normal;
+        }
+
+        /* iframes */
+        iframe {
+            width: 100%;
+            border: none;
+            min-height: 400px;
+        }
+
+        .flourish-embed {
+            width: 100%;
+            margin: 1rem 0;
+        }
+
+        /* Analysis paragraphs */
+        .analysis-text {
+            background: #f9fafb;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 6px;
+            line-height: 1.8;
+            color: var(--slate-medium);
+            font-style: normal;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            h1 { font-size: 2rem; }
+            h2 { font-size: 1.5rem; }
+            nav { gap: 1rem; flex-wrap: wrap; }
+            .nav-logo { width: 70px; margin-right: 1rem; }
+            nav ul { gap: 1rem; }
+            .hero h1 { font-size: 2rem; }
+            .page { padding: 2rem 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navigation -->
+    <nav>
+        <img src="https://upload.wikimedia.org/wikipedia/commons/a/a9/Amazon_logo.svg" alt="Amazon Logo" class="nav-logo">
+        <ul>
+            <li><a href="#" onclick="showPage('home')">Home</a></li>
+            <li><a href="#" onclick="showPage('act1')">What Products Are Sold</a></li>
+            <li><a href="#" onclick="showPage('act2')">Understanding Customer Engagement Patterns</a></li>
+            <li><a href="#" onclick="showPage('act3')">Inside the Customer Experience</a></li>
+            <li><a href="#" onclick="showPage('conclusion')">The Path Forward</a></li>
+        </ul>
+    </nav>
+
+    <!-- HOME PAGE -->
+    <div id="home" class="page active">
+        <div class="hero">
+            <h1>Understanding Amazon Customers:<br>What They Buy, How They Shop, and How They Feel</h1>
+            <p class="tagline">A complete data story across products, behavior, and emotions.</p>
+        </div>
+
+        <!-- Amazon HQ Image -->
+        <img src="https://assets.aboutamazon.com/8a/36/cadf0ad84c1e9d812b1637480117/about-amazon-feature-hero01-hq1tour-z9a9467-copy.jpg" alt="Amazon Headquarters" class="amazon-hq-image">
+
+        <div class="intro-text">
+            <p>Amazon hosts one of the largest and most dynamic marketplaces in the world, and this project analyzes it through a multi-layered data lens. Using a dataset of <strong>272,391 products</strong>, <strong>25.5 million monthly purchases</strong>, and multiple signals across pricing, reviews, ratings, and customer behavior, we break down how the marketplace works from the inside out.</p>
+
+            <p>This website follows a structured narrative across three acts:</p>
+            <ul>
+                <li><strong>first</strong>, we uncover what products dominate Amazon's shelves,</li>
+                <li><strong>then</strong> we explore how customers shop and engage over time,</li>
+                <li><strong>and finally</strong>, we analyze what customers actually feel in their reviews.</li>
+            </ul>
+
+            <p>The goal is to move beyond raw metrics and understand the story behind consumer choices — the motivations, frustrations, and emotional signals that shape Amazon's ecosystem.</p>
+        </div>
+
+        <h2>Created By</h2>
+        
+        <div class="creators-section">
+            <div class="creator-card">
+                <h3>Kruthika Srinivas Vasisht</h3>
+                <p>(002798505)</p>
+                <p>vasisht.k@northeastern.edu</p>
+            </div>
+            <div class="creator-card">
+                <h3>Krithika Annaswamy Kannan</h3>
+                <p>(002815580)</p>
+                <p>annaswamykannan.k@northeastern.edu</p>
+            </div>
+            <div class="creator-card">
+                <h3>Harikumar Prabakaran</h3>
+                <p>(002936307)</p>
+                <p>prabakaran.h@northeastern.edu</p>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin-top: 3rem;">
+            <img src="https://northeastern.instructure.com/courses/228900/files/36423739/preview" alt="QR Code" style="max-width: 200px; height: auto; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+        </div>
+    </div>
+
+    <!-- ACT 1 PAGE -->
+    <div id="act1" class="page">
+        <h1>What Products Are Sold</h1>
+        
+        <p class="tagline"><strong>272,391 products. 25.5 million monthly purchases. 4 categories. One question: What really drives consumer spending on Amazon?</strong></p>
+
+        <p>Before we understand how customers shop or how they feel, we must first decode what captures their wallets. This analysis reveals the hidden dynamics of Amazon's marketplace, where value meets volume, and pricing strategies clash with customer expectations.</p>
+
+        <h2>Market Dominance</h2>
+        <p>Not all categories are created equal. Some dominate through sheer volume, others through velocity. This visualization reveals the true powerhouses of Amazon's ecosystem.</p>
+
+        <div class="viz-container">
+            <div class="flourish-embed flourish-hierarchy" data-src="visualisation/26265146"><script src="https://public.flourish.studio/resources/embed.js"></script><noscript><img src="https://public.flourish.studio/visualisation/26265146/thumbnail" width="100%" alt="hierarchy visualization" /></noscript></div>
+        </div>
+
+        <div class="analysis-text">
+            <p>Clothing, Shoes & Jewelry dominates shelf space with 151K products representing 55% of inventory, yet this volume doesn't translate directly to sales efficiency. Beauty punches above its weight with only 27K products but generates 14M monthly sales, achieving an impressive 507 sales per product compared to Fashion's mere 30 sales per product. Electronics commands premium territory with 54K products at 3x the average price of other categories. The paradox is clear: having more products doesn't guarantee more sales, and success depends on the right balance of volume and velocity.</p>
+        </div>
+
+        <h2>The Price-Quality Paradox</h2>
+        <p>Does paying more guarantee happiness? This scatter plot challenges everything we assume about price and quality.</p>
+
+        <div class="viz-container">
+            <div class="flourish-embed flourish-scatter" data-src="visualisation/26265294"><script src="https://public.flourish.studio/resources/embed.js"></script><noscript><img src="https://public.flourish.studio/visualisation/26265294/thumbnail" width="100%" alt="scatter visualization" /></noscript></div>
+        </div>
+
+        <div class="analysis-text">
+            <p>Products over $200 show no rating improvement compared to those in the $50-100 range, revealing a clear price ceiling effect. The sweet spot has been identified: products priced between $25-75 achieve the highest average ratings at 4.2+ stars. Perhaps most striking is Electronics' premium illusion: despite commanding an average price of $159, these products earn lower ratings (3.87) than $19 Beauty products (4.34). Customers have spoken clearly: value beats luxury, and the happiest customers aren't buying the most expensive products; they're finding quality in the mid-range.</p>
+        </div>
+
+        <h2>Price Territory Wars</h2>
+        <p>Each category has carved out its pricing territory. This heatmap reveals where battles are won and lost.</p>
+
+        <div class="viz-container">
+            <div class="flourish-embed flourish-heatmap" data-src="visualisation/26266244"><script src="https://public.flourish.studio/resources/embed.js"></script><noscript><img src="https://public.flourish.studio/visualisation/26266244/thumbnail" width="100%" alt="heatmap visualization" /></noscript></div>
+        </div>
+
+        <div class="analysis-text">
+            <p>Beauty owns the budget tier with 73% of products priced under $25, maintaining accessibility as a core strategy. Electronics lives in premium space with 42% of products over $100, protecting margins through premium positioning. Fashion spreads wide across all price points, competing everywhere but potentially diluting brand positioning in the process. Success comes from owning your lane: Beauty dominates by staying accessible while Electronics maintains margins through premium positioning.</p>
+        </div>
+
+        <h2>Discount Strategy Analysis</h2>
+        <p>Who's slashing prices, and is it working? This analysis exposes the relationship between discounts, ratings, and success.</p>
+
+        <div class="viz-container">
+            <iframe title="Clothing leans on heavy discounts, Electronics doesn't" aria-label="Grouped column chart" id="datawrapper-chart-dnOGZ" src="https://datawrapper.dwcdn.net/dnOGZ/1/" scrolling="no" frameborder="0" style="width: 0; min-width: 100% !important; border: none;" height="466" data-external="1"></iframe><script type="text/javascript">window.addEventListener("message",function(a){if(void 0!==a.data["datawrapper-height"]){var e=document.querySelectorAll("iframe");for(var t in a.data["datawrapper-height"])for(var r,i=0;r=e[i];i++)if(r.contentWindow===a.source){var d=a.data["datawrapper-height"][t]+"px";r.style.height=d}}});</script>
+        </div>
+
+        <div class="analysis-text">
+            <p>Beauty leads discounting at 7.6% average yet maintains the highest ratings, demonstrating strategic discounting that preserves quality perception. Electronics resists discounts at 6.1%, actively protecting brand value. Clothing's aggressive 5.4% discounts fail to improve its weak 3.98 rating. Discounting isn't salvation: Beauty discounts strategically while maintaining quality perception, whereas Clothing's discounts signal weakness rather than value.</p>
+        </div>
+
+        <h2>Customer Voice: Review Engagement</h2>
+        <p>Customer voice matters, but where are they speaking loudest? This reveals which categories foster real engagement.</p>
+
+        <div class="viz-container">
+            <iframe title="Most reviews come from Electronics products" aria-label="Column Chart" id="datawrapper-chart-ng00Z" src="https://datawrapper.dwcdn.net/ng00Z/1/" scrolling="no" frameborder="0" style="width: 0; min-width: 100% !important; border: none;" height="481" data-external="1"></iframe><script type="text/javascript">window.addEventListener("message",function(a){if(void 0!==a.data["datawrapper-height"]){var e=document.querySelectorAll("iframe");for(var t in a.data["datawrapper-height"])for(var r,i=0;r=e[i];i++)if(r.contentWindow===a.source){var d=a.data["datawrapper-height"][t]+"px";r.style.height=d}}});</script>
+        </div>
+
+        <div class="analysis-text">
+            <p>Electronics generates 38% of all platform reviews despite representing only 20% of products, demonstrating exceptional customer engagement. Beauty users are highly vocal with the highest reviews-per-purchase ratio, indicating deep emotional investment in their purchases. Fashion stays relatively silent: despite being the largest category, it generates proportionally fewer reviews, remaining transactional rather than relational. Reviews are the pulse of loyalty: categories that inspire conversation build communities, while those that don't remain commodities.</p>
+        </div>
+
+        <div class="transition-box">
+            <p><strong>Transition:</strong> "Now we know WHAT dominates the marketplace: Fashion by volume, Beauty by efficiency, Electronics by value. But products don't buy themselves. The next chapter reveals HOW customers actually shop: their patterns, their loyalty, their journey from browser to buyer..."</p>
+        </div>
+    </div>
+
+    <!-- ACT 2 PAGE -->
+    <div id="act2" class="page">
+        <h1>Understanding Customer Engagement Patterns</h1>
+
+        <p class="tagline">Not all Amazon customers are created equal. Some shop weekly, others vanish for months. Some buy once and leave, others return again and again. This analysis reveals the patterns behind customer loyalty—and shows exactly where Amazon should focus to keep shoppers coming back.</p>
+
+        <h2>The Foundation: Who Shops When?</h2>
+        <p>We begin by segmenting customers based on <strong>recency</strong>—how recently they've made a purchase. Customers fall into five distinct groups, ranging from very recent shoppers ('Multiple times a week') to long-gap shoppers ('Less than once a month').</p>
+
+        <h3>Customer Segmentation by Recency</h3>
+
+        <div class="viz-container">
+            <iframe title="How Often Do Amazon Customers Shop?" aria-label="Donut Chart" id="datawrapper-chart-iwLQo" src="https://datawrapper.dwcdn.net/iwLQo/4/" scrolling="no" frameborder="0" style="width: 0; min-width: 100% !important; border: none;" height="397" data-external="1"></iframe><script type="text/javascript">window.addEventListener("message",function(a){if(void 0!==a.data["datawrapper-height"]){var e=document.querySelectorAll("iframe");for(var t in a.data["datawrapper-height"])for(var r,i=0;r=e[i];i++)if(r.contentWindow===a.source){var d=a.data["datawrapper-height"][t]+"px";r.style.height=d}}});</script>
+        </div>
+
+        <div class="analysis-text">
+            <p>Most customers shop a few times per month. A smaller segment shops multiple times weekly, representing Amazon's most engaged customers. Low-recency customers signal churn risk.</p>
+        </div>
+
+        <h2>The Dynamic View: How Shopping Patterns Shift Over Time</h2>
+        <p>Understanding who shops is only part of the story. Now we examine when they shop—and discover that customer recency isn't static.</p>
+
+        <h3>Seasonal Trends by Recency</h3>
+
+        <div class="viz-container">
+            <div class="flourish-embed flourish-chart" data-src="visualisation/26256355"><script src="https://public.flourish.studio/resources/embed.js"></script><noscript><img src="https://public.flourish.studio/visualisation/26256355/thumbnail" width="100%" alt="chart visualization" /></noscript></div>
+        </div>
+
+        <div class="analysis-text">
+            <p>Shopping surges during Prime Day, Black Friday, and December holidays. High-recency shoppers stay active year-round as Amazon's core base. During sales, middle-recency customers act like high-frequency shoppers, while dormant customers reappear. Event-driven categories (electronics, fashion, beauty) spike during sales. Everyday essentials stay stable year-round. Promotion-dependent categories only lift during discounts.</p>
+        </div>
+
+        <h2>Where Loyalty Lives: Category-Specific Retention Patterns</h2>
+        <p>Now that we understand when customers engage, let's examine where loyalty is strongest. This chart compares repeat customers to total customers across product categories, revealing which categories build lasting relationships versus one-time transactions.</p>
+
+        <h3>Repeat Customer Analysis by Category</h3>
+
+        <div class="viz-container">
+            <div class="flourish-embed flourish-chart" data-src="visualisation/26255621"><script src="https://public.flourish.studio/resources/embed.js"></script><noscript><img src="https://public.flourish.studio/visualisation/26255621/thumbnail" width="100%" alt="chart visualization" /></noscript></div>
+        </div>
+
+        <div class="analysis-text">
+            <p>Beauty & Personal Care has the highest repeat ratio. Electronics shows strong loyalty despite longer cycles. Clothing has weak repeat rates. Home & Kitchen balances repeat and occasional buyers. Books shows exceptional loyalty. Consumables build habits; durables face longer replacement cycles.</p>
+        </div>
+
+        <h2>The Behavioral Blueprint: What Separates Loyal Customers from Occasional Shoppers</h2>
+        <p>Understanding retention rates raises a critical question: <strong>what behaviors drive customers to return?</strong> This breakdown analyzes five key actions—searching, browsing, reviewing, cart abandonment, and product exploration.</p>
+
+        <h3>Behavioral Analysis Across Customer Segments</h3>
+
+        <div class="viz-container">
+            <iframe title="Behavioral analysis of U.S. Amazon customers" aria-label="Stacked Bars" id="datawrapper-chart-wYbdm" src="https://datawrapper.dwcdn.net/wYbdm/3/" scrolling="no" frameborder="0" style="width: 0; min-width: 100% !important; border: none;" height="394" data-external="1"></iframe><script type="text/javascript">window.addEventListener("message",function(a){if(void 0!==a.data["datawrapper-height"]){var e=document.querySelectorAll("iframe");for(var t in a.data["datawrapper-height"])for(var r,i=0;r=e[i];i++)if(r.contentWindow===a.source){var d=a.data["datawrapper-height"][t]+"px";r.style.height=d}}});</script>
+        </div>
+
+        <div class="analysis-text">
+            <p>High-repeat customers browse deeply, exploring multiple pages per session. They search actively and engage with reviews. Low-retention categories show high cart abandonment and minimal exploration. Beauty drives retention through natural exploration and experimentation.</p>
+        </div>
+
+        <h2>The Human Element: Who Are These Customers?</h2>
+        <p>Data tells us what customers do. Now let's see who they are. This hierarchical visualization maps customer distribution across age groups, product categories, and gender—revealing the demographic DNA of each category.</p>
+
+        <h3>Customer Demographics: Age, Category, and Gender</h3>
+
+        <div class="viz-container">
+            <div class="flourish-embed flourish-hierarchy" data-src="visualisation/26259512"><script src="https://public.flourish.studio/resources/embed.js"></script><noscript><img src="https://public.flourish.studio/visualisation/26259512/thumbnail" width="100%" alt="hierarchy visualization" /></noscript></div>
+        </div>
+
+        <div class="analysis-text">
+            <p>Younger customers (18-34) dominate Electronics and Beauty. Middle-aged shoppers (35-50) prefer Home and Kitchen. Fashion and Beauty skew female; Electronics skews male. Different demographics require different retention strategies.</p>
+        </div>
+
+        <h2>So What? Strategic Implications for Amazon</h2>
+        <p>This behavioral analysis reveals four critical opportunities:</p>
+
+        <p><strong>1. Double Down on Beauty & Personal Care</strong><br>
+        With the highest repeat rates and naturally exploratory shopping behavior, this category deserves premium loyalty program investment and personalized recommendation engines.</p>
+
+        <p><strong>2. Leverage Seasonal Segment Shifts</strong><br>
+        Middle-recency customers behave like high-frequency shoppers during sales periods. Target them aggressively 2-3 weeks before Prime Day and Black Friday: they're primed to convert.</p>
+
+        <p><strong>3. Prevent Churn in Low-Recency Segments</strong><br>
+        Customers drifting into low-recency bands need proactive re-engagement before they disappear entirely. Personalized "we miss you" campaigns with category-specific incentives can recapture dormant value.</p>
+
+        <p><strong>4. Build Category-Specific Retention Playbooks</strong></p>
+        <ul>
+            <li><strong>Clothing/Fashion</strong>: Combat weak retention with style profiles, virtual try-ons, and fit guarantees</li>
+            <li><strong>Electronics</strong>: Emphasize trade-in programs and accessory ecosystems to shorten replacement cycles</li>
+            <li><strong>Home/Kitchen</strong>: Cross-sell complementary items during the initial purchase to build basket value and return visits</li>
+        </ul>
+
+        <div class="transition-box">
+            <p>We've uncovered how customers behave: their rhythms, habits, and loyalty patterns. But behavior isn't the whole truth. To understand the real customer experience, we must listen to their voice. Inside Customer Experience dives into the emotions, sentiments, and stories behind every review.</p>
+        </div>
+    </div>
+
+    <!-- ACT 3 PAGE -->
+    <div id="act3" class="page">
+        <h1>Inside the Customer Experience</h1>
+
+        <p class="tagline">Shopping on Amazon isn't just about what people buy: it's about what they feel after they buy it.</p>
+
+        <p>In this part of the project, we dive into customer voices to understand engagement, sentiment, emotional patterns, and the deeper reasons behind praise or frustration. Each chart below represents a chapter in that story, helping us uncover what truly shapes the customer experience.</p>
+
+        <h2>Review Volume by Category Over Time</h2>
+        
+        <p>Before exploring emotions or complaints, we first need to understand where customers are speaking the loudest. Some categories naturally attract more reviews, and that tells us where customer attention and product demand truly lies. This dynamic visualization shows how review volume shifts across categories throughout the year, revealing which products inspire the most conversation and when that engagement peaks.</p>
+
+        <div class="viz-container">
+            <div class="flourish-embed flourish-bar-chart-race" data-src="visualisation/26248333"><script src="https://public.flourish.studio/resources/embed.js"></script><noscript><img src="https://public.flourish.studio/visualisation/26248333/thumbnail" width="100%" alt="bar-chart-race visualization" /></noscript></div>
+        </div>
+
+        <div class="analysis-text">
+            <p>Electronics and Home consistently stay at the top, showing strong year-round customer engagement. Beauty rises and falls sharply, reflecting trend-based buying influenced by seasons and social media.</p>
+        </div>
+
+        <h2>Sentiment Distribution across Categories</h2>
+        
+        <p>Once we know which categories get attention, the next question is: Are customers generally happy, disappointed, or neutral about those purchases? Understanding the emotional tone of each category helps identify where Amazon excels at meeting customer expectations and where systemic issues create recurring dissatisfaction. This breakdown separates positive, neutral, and negative sentiment to reveal the overall health of customer satisfaction across the marketplace.</p>
+
+        <div class="viz-container">
+            <iframe title="Customer Sentiment Across Amazon Categories in 2023" aria-label="Stacked Bars" id="datawrapper-chart-6d4jH" src="https://datawrapper.dwcdn.net/6d4jH/1/" scrolling="no" frameborder="0" style="width: 0; min-width: 100% !important; border: none;" height="315" data-external="1"></iframe><script type="text/javascript">window.addEventListener("message",function(a){if(void 0!==a.data["datawrapper-height"]){var e=document.querySelectorAll("iframe");for(var t in a.data["datawrapper-height"])for(var r,i=0;r=e[i];i++)if(r.contentWindow===a.source){var d=a.data["datawrapper-height"][t]+"px";r.style.height=d}}});</script>
+        </div>
+
+        <div class="analysis-text">
+            <p>Beauty and Electronics carry higher negative sentiment, signaling recurring quality or reliability concerns. Books and Sports/Outdoor show consistently positive sentiment, suggesting strong product satisfaction.</p>
+        </div>
+
+        <h2>Text vs Star Rating (Match vs Mismatch)</h2>
+        
+        <p>Sometimes customers give high star ratings but describe problems in their text or the opposite. This mismatch exposes hidden dissatisfaction that star ratings alone would never show. By comparing what customers say in their written reviews to the numerical ratings they assign, we can identify cases where sentiment doesn't align with scores. This reveals a critical gap: relying solely on star averages may mask underlying issues that only surface in the text itself.</p>
+
+        <div class="viz-container">
+            <iframe title="Do Customers Rate Consistently? Text vs Star Rating Match (2023)" aria-label="Stacked Bars" id="datawrapper-chart-SFx9Z" src="https://datawrapper.dwcdn.net/SFx9Z/1/" scrolling="no" frameborder="0" style="width: 0; min-width: 100% !important; border: none;" height="284" data-external="1"></iframe><script type="text/javascript">window.addEventListener("message",function(a){if(void 0!==a.data["datawrapper-height"]){var e=document.querySelectorAll("iframe");for(var t in a.data["datawrapper-height"])for(var r,i=0;r=e[i];i++)if(r.contentWindow===a.source){var d=a.data["datawrapper-height"][t]+"px";r.style.height=d}}});</script>
+        </div>
+
+        <div class="analysis-text">
+            <p>A large share of reviews don't align with their star ratings, meaning text sentiment offers a more honest signal. Brands relying only on star ratings may miss early warning signs of product issues.</p>
+        </div>
+
+        <h2>Emotions Behind the Review</h2>
+        
+        <p>Sentiment tells us if a review is positive or negative. Emotion tells us why. By mapping emotions like anger, joy, trust, and frustration, we uncover the deeper reactions behind customer words. This emotional fingerprint goes beyond simple satisfaction scores to reveal what customers truly feel: whether they're delighted by a great purchase, frustrated by poor quality, or angry about unmet expectations. Understanding these emotional drivers helps identify not just what went wrong, but how intensely customers feel about their experience.</p>
+
+        <div class="viz-container">
+            <div class="flourish-embed flourish-radar" data-src="visualisation/26246568"><script src="https://public.flourish.studio/resources/embed.js"></script><noscript><img src="https://public.flourish.studio/visualisation/26246568/thumbnail" width="100%" alt="radar visualization" /></noscript></div>
+        </div>
+
+        <div class="analysis-text">
+            <p>Anger and frustration dominate the categories with the most negative reviews. Joy appears strongly in categories where customers feel they received great value or exceeded expectations.</p>
+        </div>
+
+        <h2>Customer Feedback Journey</h2>
+        
+        <p>Customer feedback follows a journey: category → sentiment → emotional theme. This flow helps us understand how customer experiences transition into specific emotional outcomes. Rather than viewing feedback in isolation, this visualization traces the path from what customers bought, to how they felt about it, to the specific themes they mentioned. It reveals not just that customers are unhappy, but precisely which aspects of their experience (product quality, delivery, value) drive those emotions across different product categories.</p>
+
+        <div class="viz-container">
+            <div class="flourish-embed flourish-sankey" data-src="visualisation/26248520"><script src="https://public.flourish.studio/resources/embed.js"></script><noscript><img src="https://public.flourish.studio/visualisation/26248520/thumbnail" width="100%" alt="sankey visualization" /></noscript></div>
+        </div>
+
+        <div class="analysis-text">
+            <p>Negative reviews most commonly flow into themes related to "Product Quality" and "Delivery Issues." Positive reviews cluster around "Value for Money" and "Ease of Use," highlighting what customers appreciate most.</p>
+        </div>
+
+        <h2>Top Complaints Driving Negative Feedback</h2>
+        
+        <p>To truly understand dissatisfaction, we need to identify the core issues customers repeatedly mention. This chart highlights the most common problems driving negative experiences. By quantifying the frequency of specific complaints (quality defects, shipping delays, misleading descriptions) we can pinpoint exactly where Amazon's customer experience breaks down. These aren't isolated incidents; they're systemic patterns that, if addressed, could dramatically reduce negative sentiment and unlock significant revenue potential.</p>
+
+        <div class="viz-container">
+            <div class="flourish-embed flourish-chart" data-src="visualisation/26248256"><script src="https://public.flourish.studio/resources/embed.js"></script><noscript><img src="https://public.flourish.studio/visualisation/26248256/thumbnail" width="100%" alt="chart visualization" /></noscript></div>
+        </div>
+
+        <div class="analysis-text">
+            <p>Product Quality emerges as the top complaint, dominating negative feedback across multiple categories. Packaging and shipping issues are also major pain points, reflecting both product and logistical challenges.</p>
+        </div>
+    </div>
+
+    <!-- CONCLUSION PAGE -->
+    <div id="conclusion" class="page">
+        <h1>The Path Forward</h1>
+
+        <p class="tagline">Amazon's greatest opportunity isn't in adding more products: it's in fixing the experience customers already care about.</p>
+
+        <p>Across all three acts, one theme repeats: quality issues and unmet expectations create the biggest drag on satisfaction and future revenue. The data shows that if Amazon simply solves the most common customer frustrations: product quality, delivery reliability, and clarity of information, categories like Electronics, Home, and Clothing could unlock double-digit growth without a single new product launch.</p>
+
+        <div class="conclusion-box">
+            <h3>The path forward is clear:</h3>
+            <ul>
+                <li>Invest where loyalty is already strong (Beauty, Home, Books).</li>
+                <li>Repair the weak spots that fuel negative sentiment.</li>
+                <li>Tailor retention strategies to each category's unique behavior and demographics.</li>
+            </ul>
+            <p style="margin-top: 1.5rem; font-size: 1.1rem;">Fixing the fundamentals isn't glamorous: but it's where the biggest upside lives.</p>
+        </div>
+
+        <h2>The Revenue Opportunity</h2>
+        <p>Assuming Amazon implements the recommendations above, here's the potential impact across key categories. This chart estimates additional sales each category could unlock by addressing the top customer issues behind negative reviews.</p>
+
+        <div id="react-chart-root"></div>
+
+        <div class="analysis-text">
+            <p>Electronics shows the strongest improvement potential, followed by Home & Kitchen: highlighting where fixing customer issues can drive the greatest sales gains.</p>
+        </div>
+    </div>
+
+    <script type="text/babel">
+const HorizontalStackedBarChart = () => {
+  const data = [
+    { category: 'Electronics', current: 1600000, extra: 272000 },
+    { category: 'Home & Kitchen', current: 1300000, extra: 195000 },
+    { category: 'Clothing', current: 1100000, extra: 132000 },
+    { category: 'Books', current: 900000, extra: 108000 },
+    { category: 'Beauty & Personal Care', current: 780000, extra: 93600 }
+  ].map(item => ({
+    ...item,
+    total: item.current + item.extra
+  })).sort((a, b) => b.total - a.total);
+
+  const maxTotal = Math.max(...data.map(d => d.total));
+  const chartWidth = 600;
+  const barHeight = 50;
+  const spacing = 30;
+  const leftMargin = 180;
+  const rightMargin = 150;
+
+  const formatNumber = (num) => {
+    return num.toLocaleString('en-US');
+  };
+
+  const getBarWidth = (value) => {
+    return (value / maxTotal) * chartWidth;
+  };
+
+  return (
+    <div className="flex flex-col items-center p-8 bg-white">
+      <div className="max-w-5xl w-full">
+        <h1 className="text-2xl font-bold text-gray-900 mb-2">
+          Sales Potential After Fixing Customer Issues
+        </h1>
+        <p className="text-sm text-gray-600 mb-8">
+          Showing existing sales and additional potential sales across major Amazon categories.
+        </p>
+
+        <svg width={chartWidth + leftMargin + rightMargin} height={data.length * (barHeight + spacing) + 80} className="mx-auto">
+          {/* Gridlines */}
+          {[0, 0.25, 0.5, 0.75, 1].map((tick, i) => {
+            const x = leftMargin + tick * chartWidth;
+            return (
+              <g key={i}>
+                <line
+                  x1={x}
+                  y1={20}
+                  x2={x}
+                  y2={data.length * (barHeight + spacing) + 20}
+                  stroke="#E5E5E5"
+                  strokeWidth="1"
+                />
+              </g>
+            );
+          })}
+
+          {/* Bars */}
+          {data.map((item, index) => {
+            const y = 40 + index * (barHeight + spacing);
+            const currentWidth = getBarWidth(item.current);
+            const extraWidth = getBarWidth(item.extra);
+            const percentIncrease = ((item.extra / item.current) * 100).toFixed(1);
+
+            return (
+              <g key={index}>
+                {/* Category label */}
+                <text
+                  x={leftMargin - 10}
+                  y={y + barHeight / 2}
+                  textAnchor="end"
+                  alignmentBaseline="middle"
+                  className="text-sm font-medium fill-gray-700"
+                >
+                  {item.category}
+                </text>
+
+                {/* Current Sales bar (gray) */}
+                <rect
+                  x={leftMargin}
+                  y={y}
+                  width={currentWidth}
+                  height={barHeight}
+                  fill="#A8A8A8"
+                  rx="2"
+                />
+
+                {/* Extra Sales bar (orange) */}
+                <rect
+                  x={leftMargin + currentWidth}
+                  y={y}
+                  width={extraWidth}
+                  height={barHeight}
+                  fill="#FF9900"
+                  rx="2"
+                />
+
+                {/* Percent increase label */}
+                <text
+                  x={leftMargin + currentWidth + extraWidth + 10}
+                  y={y + barHeight / 2}
+                  textAnchor="start"
+                  alignmentBaseline="middle"
+                  className="text-base font-bold fill-green-600"
+                >
+                  +{percentIncrease}%
+                </text>
+              </g>
+            );
+          })}
+
+          {/* Legend */}
+          <g transform={`translate(${leftMargin}, ${data.length * (barHeight + spacing) + 50})`}>
+            <rect x="0" y="0" width="20" height="15" fill="#A8A8A8" rx="2" />
+            <text x="25" y="12" className="text-xs fill-gray-700">Current Sales</text>
+
+            <rect x="140" y="0" width="20" height="15" fill="#FF9900" rx="2" />
+            <text x="165" y="12" className="text-xs fill-gray-700">Extra Sales (Potential)</text>
+          </g>
+        </svg>
+
+        <div className="mt-8 space-y-4">
+          <p className="text-xs text-gray-500 italic">
+            Source: McAuley Amazon Reviews Dataset, Author Estimates
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const root = ReactDOM.createRoot(document.getElementById('react-chart-root'));
+root.render(<HorizontalStackedBarChart />);
+    </script>
+
+    <script>
+        function showPage(pageId) {
+            const pages = document.querySelectorAll('.page');
+            pages.forEach(page => page.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+            window.scrollTo(0, 0);
+        }
+    </script>
+</body>
+</html>
